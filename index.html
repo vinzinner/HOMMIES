@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Homies Offline</title>
+<title>Homies - Fixed & Functional</title>
 <style>
-body {margin:0;font-family:Arial;background:#aaa;padding:40px;text-align:center;}
-.grid {display:grid;grid-template-columns:repeat(auto-fit, 250px);gap:40px;justify-content:center;}
-.card {background:#a97f7f;border:8px solid #d8dfd2;border-radius:10px;padding:20px;box-shadow:4px 4px 10px rgba(0,0,0,0.2);cursor:pointer;transition: transform 0.1s;}
-.card:hover {transform: scale(1.02);}
-.avatar {width:100%;height:220px;background:#d8dfd2;overflow:hidden;display:flex;justify-content:center;align-items:center;}
-.avatar img {width:100%;height:100%;object-fit:cover;}
-.name {margin-top:18px;font-size:24px;font-weight:bold;color:white;}
-button {margin-bottom:20px;padding:16px 28px;font-size:20px;cursor:pointer;background:#a97f7f;border:8px solid #d8dfd2;border-radius:10px;color:white;font-weight:bold;box-shadow:4px 4px 10px rgba(0,0,0,0.2);}
-.trait-card {padding:15px; border-radius:10px; border:4px solid #d8dfd2; color:white; font-weight:bold; font-size:18px;}
-#addPage, #profilePage {display:none;}
+    body {margin:0;font-family:Arial;background:#aaa;padding:40px;text-align:center;}
+    .grid {display:grid;grid-template-columns:repeat(auto-fit, 250px);gap:40px;justify-content:center;}
+    .card {position:relative; background:#a97f7f;border:8px solid #d8dfd2;border-radius:10px;padding:20px;box-shadow:4px 4px 10px rgba(0,0,0,0.2);cursor:pointer;}
+    .delete-btn {position:absolute; top:5px; right:5px; background:rgba(255,255,255,0.7); border:none; border-radius:50%; width:30px; height:30px; cursor:pointer; font-weight:bold; color:red;}
+    .avatar {width:100%;height:220px;background:#d8dfd2;overflow:hidden;display:flex;justify-content:center;align-items:center;}
+    .avatar img {width:100%;height:100%;object-fit:cover;}
+    .name {margin-top:18px;font-size:24px;font-weight:bold;color:white;}
+    button {margin-bottom:20px;padding:16px 28px;font-size:20px;cursor:pointer;background:#a97f7f;border:8px solid #d8dfd2;border-radius:10px;color:white;font-weight:bold;}
+    .trait-card {padding:15px; border-radius:10px; border:4px solid #d8dfd2; color:white; font-weight:bold; cursor:pointer;}
+    #addPage, #profilePage {display:none;}
 </style>
 </head>
 <body>
@@ -26,6 +26,7 @@ button {margin-bottom:20px;padding:16px 28px;font-size:20px;cursor:pointer;backg
 
 <div id="profilePage" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#aaa; padding:40px; box-sizing:border-box; z-index:1000; overflow:auto;">
     <h1 id="profileName" style="color:white; font-size:48px;"></h1>
+    <p style="color:white;">(Click a trait to delete it)</p>
     <div id='traits' style='display:flex;flex-wrap:wrap;gap:20px;justify-content:center;'></div><br>
     <button onclick='addTrait()'>+ Add Trait</button>
     <button onclick="goHome()">Back</button>
@@ -33,24 +34,22 @@ button {margin-bottom:20px;padding:16px 28px;font-size:20px;cursor:pointer;backg
 
 <div id="addPage">
     <h1>Add a Homie</h1>
-    <input type="text" id="nameInput" placeholder="Homie Name" style="padding:10px; font-size:18px;"><br><br>
+    <input type="text" id="nameInput" placeholder="Homie Name"><br><br>
     <input type="file" id="imgInput" accept="image/*"><br><br>
-    <p>Or choose a default:</p>
     <div id='defaultPics' style='display:flex;justify-content:center;gap:15px;'>
-        <img src='images/WBZR1.jpg' onclick='selectDefault(this.src)' style='width:80px;height:80px;cursor:pointer;border:4px solid #d8dfd2;border-radius:10px;'>
-        <img src='images/taawa.jpg' onclick='selectDefault(this.src)' style='width:80px;height:80px;cursor:pointer;border:4px solid #d8dfd2;border-radius:10px;'>
-        <img src='images/TowIg.jpg' onclick='selectDefault(this.src)' style='width:80px;height:80px;cursor:pointer;border:4px solid #d8dfd2;border-radius:10px;'>
+        <img src='images/WBZR1.jpg' onclick='selectDefault(this.src)' style='width:80px;height:80px;cursor:pointer;border:4px solid #d8dfd2;'>
+        <img src='images/taawa.jpg' onclick='selectDefault(this.src)' style='width:80px;height:80px;cursor:pointer;border:4px solid #d8dfd2;'>
+        <img src='images/TowIg.jpg' onclick='selectDefault(this.src)' style='width:80px;height:80px;cursor:pointer;border:4px solid #d8dfd2;'>
     </div><br>
     <button onclick="saveHomie()">Save</button>
     <button onclick="goHome()">Back</button>
 </div>
 
 <script>
+    // Paste your sample string here if you want defaults!
     let homies = JSON.parse(localStorage.getItem('homies_data')) || [];
     let selectedDefault = '';
     let currentProfileIndex = null;
-
-    // --- Core Logic ---
 
     function renderGrid() {
         const grid = document.getElementById('grid');
@@ -58,84 +57,64 @@ button {margin-bottom:20px;padding:16px 28px;font-size:20px;cursor:pointer;backg
         homies.forEach((h, index) => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.onclick = () => openProfile(index);
-            card.innerHTML = `<div class='avatar'><img src='${h.img}'></div><div class='name'>${h.name}</div>`;
+            // Main card click opens profile
+            card.onclick = (e) => { if(e.target.className !== 'delete-btn') openProfile(index); };
+            card.innerHTML = `
+                <button class="delete-btn" onclick="deleteHomie(${index})">X</button>
+                <div class='avatar'><img src='${h.img}'></div>
+                <div class='name'>${h.name}</div>
+            `;
             grid.appendChild(card);
         });
         localStorage.setItem('homies_data', JSON.stringify(homies));
     }
 
-   function saveHomie() {
-    const nameInput = document.getElementById('nameInput');
-    const imgInput = document.getElementById('imgInput');
-    const name = nameInput.value.trim();
-    const file = imgInput.files[0];
-    
-    if (!name) {
-        alert('Please enter a name');
-        return;
+    function deleteHomie(index) {
+        if(confirm("Delete this homie?")) {
+            homies.splice(index, 1);
+            renderGrid();
+        }
     }
 
-    // Helper function to actually commit the save
-    const processData = (imgSrc) => {
-        homies.push({ 
-            name: name, 
-            img: imgSrc, 
-            traits: [] 
-        });
-        
-        // Save to browser memory and update the UI
-        renderGrid(); 
-        
-        // Clear inputs for next time
-        nameInput.value = '';
-        imgInput.value = '';
-        selectedDefault = '';
-        
-        // GO HOME
-        goHome();
-    };
+    function saveHomie() {
+        const name = document.getElementById('nameInput').value.trim();
+        const file = document.getElementById('imgInput').files[0];
+        if (!name) return alert('Enter name');
 
-    if (file) {
-        // Option A: User uploaded a new file
-        const reader = new FileReader();
-        reader.onload = (e) => processData(e.target.result);
-        reader.onerror = () => alert("Error reading file!");
-        reader.readAsDataURL(file);
-    } else if (selectedDefault) {
-        // Option B: User clicked one of the 3 default images
-        processData(selectedDefault);
-    } else {
-        // Option C: Safety fall-back if nothing was picked
-        alert('Please click one of the pictures or upload a file.');
-    }
-}
+        const process = (src) => {
+            homies.push({ name: name, img: src, traits: [] });
+            renderGrid(); goHome();
+        };
 
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => processData(e.target.result);
+            reader.onload = (e) => process(e.target.result);
             reader.readAsDataURL(file);
         } else if (selectedDefault) {
-            processData(selectedDefault);
+            process(selectedDefault);
         } else {
-            alert('Please select or upload an image');
+            alert("Pick an image!");
         }
     }
 
     function openProfile(index) {
         currentProfileIndex = index;
-        const h = homies[index];
         document.getElementById('homePage').style.display = 'none';
         document.getElementById('profilePage').style.display = 'block';
-        document.getElementById('profileName').innerText = h.name;
+        document.getElementById('profileName').innerText = homies[index].name;
         displayTraits();
     }
 
     function addTrait() {
-        const word = prompt('What is this homie like?');
+        const word = prompt('Enter trait:');
         if (!word) return;
-        
         homies[currentProfileIndex].traits.push(word);
+        displayTraits();
+        localStorage.setItem('homies_data', JSON.stringify(homies));
+    }
+
+    function deleteTrait(traitIndex) {
+        homies[currentProfileIndex].traits.splice(traitIndex, 1);
         displayTraits();
         localStorage.setItem('homies_data', JSON.stringify(homies));
     }
@@ -144,38 +123,21 @@ button {margin-bottom:20px;padding:16px 28px;font-size:20px;cursor:pointer;backg
         const container = document.getElementById('traits');
         container.innerHTML = '';
         const colors = ['#ff9999','#99ccff','#99ff99','#ffcc99','#cc99ff'];
-        const h = homies[currentProfileIndex];
-        
-        h.traits.forEach(t => {
+        homies[currentProfileIndex].traits.forEach((t, i) => {
             const div = document.createElement('div');
             div.className = 'trait-card';
-            div.style.background = colors[Math.floor(Math.random() * colors.length)];
+            div.style.background = colors[i % colors.length];
             div.innerText = t;
+            div.onclick = () => deleteTrait(i); // Delete on click
             container.appendChild(div);
         });
     }
 
-    // --- Navigation ---
+    function showAddPage() { document.getElementById('homePage').style.display = 'none'; document.getElementById('addPage').style.display = 'block'; }
+    function goHome() { document.getElementById('homePage').style.display = 'block'; document.getElementById('addPage').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; }
+    function selectDefault(src) { selectedDefault = src; }
 
-    function showAddPage() {
-        document.getElementById('homePage').style.display = 'none';
-        document.getElementById('addPage').style.display = 'block';
-    }
-
-    function goHome() {
-        document.getElementById('homePage').style.display = 'block';
-        document.getElementById('addPage').style.display = 'none';
-        document.getElementById('profilePage').style.display = 'none';
-    }
-
-    function selectDefault(src) {
-        selectedDefault = src;
-        alert("Avatar selected!");
-    }
-
-    // Initial Load
     window.onload = renderGrid;
 </script>
-
 </body>
 </html>
