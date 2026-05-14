@@ -3,37 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Homies Flip</title>
+<title>Homies - 3D Flip Edition</title>
 <style>
-    body { margin:0; font-family:Arial; background:#aaa; padding:40px; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit, 250px); gap:40px; justify-content:center; perspective: 1000px; }
+    body { margin:0; font-family:Arial, sans-serif; background:#aaa; padding:40px; text-align:center; }
+    
+    .grid { 
+        display:grid; 
+        grid-template-columns:repeat(auto-fit, 250px); 
+        gap:40px; 
+        justify-content:center; 
+        /* Perspective on the parent allows the 3D effect to happen */
+        perspective: 1200px; 
+    }
     
     /* The 3D Container */
-    .card-container { width: 250px; height: 350px; position: relative; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; cursor: pointer; }
+    .card-container { 
+        width: 250px; 
+        height: 350px; 
+        position: relative; 
+        /* Smooth, bouncy animation */
+        transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        transform-style: preserve-3d; 
+        -webkit-transform-style: preserve-3d;
+        cursor: pointer;
+    }
     
-    /* When clicked/active, enlarge and flip */
-    .card-container.active { transform: scale(1.2) rotateY(180deg); z-index: 100; }
-
-    .card-front, .card-back {
-        position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
-        border: 8px solid #d8dfd2; border-radius: 10px; box-sizing: border-box;
-        display: flex; flex-direction: column; align-items: center; padding: 15px; box-shadow: 4px 4px 10px rgba(0,0,0,0.2);
+    /* The Flip and Enlarge State */
+    .card-container.active { 
+        transform: rotateY(180deg) scale(1.1); 
+        z-index: 1000; 
     }
 
-    .card-front { background: #a97f7f; }
-    .card-back { background: #8e6b6b; transform: rotateY(180deg); overflow-y: auto; }
+    /* Common styles for Front and Back */
+    .card-front, .card-back {
+        position: absolute; 
+        width: 100%; 
+        height: 100%; 
+        /* Hide the other side during the flip */
+        backface-visibility: hidden; 
+        -webkit-backface-visibility: hidden;
+        border: 8px solid #d8dfd2; 
+        border-radius: 15px; 
+        box-sizing: border-box;
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        padding: 15px; 
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
 
-    .avatar { width: 100%; height: 200px; background: #d8dfd2; overflow: hidden; border-radius: 5px; }
+    .card-front { 
+        background: #a97f7f; 
+        z-index: 2; 
+    }
+
+    .card-back { 
+        background: #8e6b6b; 
+        /* The back starts already flipped 180 degrees */
+        transform: rotateY(180deg); 
+        z-index: 1; 
+        overflow-y: auto;
+    }
+
+    .avatar { width: 100%; height: 210px; background: #d8dfd2; overflow: hidden; border-radius: 8px; }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .name { margin-top: 15px; font-size: 22px; font-weight: bold; color: white; }
+    .name { margin-top: 15px; font-size: 24px; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
     
-    .trait-tag { background: #ff9999; color: white; padding: 5px 10px; border-radius: 5px; margin: 5px; font-size: 14px; font-weight: bold; }
+    .trait-tag { 
+        background: #ff9999; 
+        color: white; 
+        padding: 6px 12px; 
+        border-radius: 20px; 
+        margin: 5px; 
+        font-size: 14px; 
+        font-weight: bold; 
+        border: 2px solid rgba(255,255,255,0.3);
+    }
     
-    .delete-btn { position: absolute; top: -10px; right: -10px; background: white; border: 2px solid red; border-radius: 50%; width: 25px; height: 25px; color: red; font-weight: bold; cursor: pointer; z-index: 10; }
+    .delete-btn { 
+        position: absolute; top: -10px; right: -10px; 
+        background: #fff; border: 3px solid #ff4444; border-radius: 50%; 
+        width: 32px; height: 32px; color: #ff4444; 
+        font-weight: bold; cursor: pointer; z-index: 100; 
+    }
     
-    .btn-ui { margin-bottom: 20px; padding: 10px 20px; background: #a97f7f; border: 4px solid #d8dfd2; color: white; font-weight: bold; border-radius: 10px; cursor: pointer; display: block; margin: 10px auto; }
+    .btn-ui { 
+        margin: 10px auto; padding: 12px 24px; 
+        background: #a97f7f; border: 4px solid #d8dfd2; 
+        color: white; font-weight: bold; border-radius: 12px; 
+        cursor: pointer; font-size: 18px;
+    }
     
-    #addPage { display:none; text-align:center; color:white; }
+    #addPage { display:none; }
+    #addPage h1 { color: white; }
+    input { padding: 10px; border-radius: 8px; border: none; width: 80%; max-width: 300px; margin-bottom: 10px; }
 </style>
 </head>
 <body>
@@ -44,30 +107,35 @@
 </div>
 
 <div id="addPage">
-    <h1>Add a Homie</h1>
-    <input type="text" id="nameInput" placeholder="Name"><br><br>
+    <h1>Add a New Homie</h1>
+    <input type="text" id="nameInput" placeholder="Enter Name"><br>
+    <p style="color:white">Upload photo:</p>
     <input type="file" id="imgInput" accept="image/*"><br><br>
-    <button class="btn-ui" onclick="saveHomie()">Save</button>
-    <button class="btn-ui" onclick="goHome()">Cancel</button>
+    <button class="btn-ui" onclick="saveHomie()">Save Homie</button>
+    <button class="btn-ui" style="background:#666" onclick="goHome()">Cancel</button>
 </div>
 
 <script>
+// Your Backup Data
 const exportedBackup = '[{"name":"hsj","img":"https://vinzinner.github.io/HOMMIES/images/WBZR1.jpg","traits":["菜","菜","菜"]},{"name":"zds","img":"https://vinzinner.github.io/HOMMIES/images/taawa.jpg","traits":["Absent","Absent","Absent"]},{"name":"zza","img":"https://vinzinner.github.io/HOMMIES/images/TowIg.jpg","traits":["fat ","fat","fat"]}]';
 
-let homies = JSON.parse(localStorage.getItem('homies_data'));
-if (!homies || homies.length === 0) {
-    homies = JSON.parse(exportedBackup);
-}
+// Force load the backup every time to clear mobile cache
+let homies = JSON.parse(exportedBackup);
+localStorage.setItem('homies_data', JSON.stringify(homies));
 
 function renderGrid() {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
+    
     homies.forEach((h, index) => {
         const container = document.createElement('div');
         container.className = 'card-container';
         container.id = `card-${index}`;
-        container.onclick = (e) => {
-            if(e.target.tagName !== 'BUTTON') container.classList.toggle('active');
+        
+        // Flip Logic
+        container.onclick = function(e) {
+            if (e.target.tagName === 'BUTTON' || e.target.classList.contains('trait-tag')) return;
+            this.classList.toggle('active');
         };
 
         container.innerHTML = `
@@ -75,67 +143,8 @@ function renderGrid() {
             <div class="card-front">
                 <div class="avatar"><img src="${h.img}"></div>
                 <div class="name">${h.name}</div>
-                <p style="color:rgba(255,255,255,0.6); font-size:12px;">Click to see traits</p>
+                <p style="color:rgba(255,255,255,0.7); font-size:12px; margin-top:20px;">Tap to Flip</p>
             </div>
             <div class="card-back">
-                <div class="name" style="margin-bottom:10px;">${h.name}'s Traits</div>
-                <div id="traits-${index}" style="display:flex; flex-wrap:wrap; justify-content:center;">
-                    ${h.traits.map((t, tIdx) => `<span class="trait-tag" onclick="deleteTrait(${index}, ${tIdx})">${t}</span>`).join('')}
-                </div>
-                <button class="btn-ui" style="font-size:14px;" onclick="addTrait(${index})">+ Add</button>
-            </div>
-        `;
-        grid.appendChild(container);
-    });
-    localStorage.setItem('homies_data', JSON.stringify(homies));
-}
-
-function addTrait(index) {
-    const t = prompt("New Trait:");
-    if(t) {
-        homies[index].traits.push(t);
-        renderGrid();
-        document.getElementById(`card-${index}`).classList.add('active'); // Keep it flipped
-    }
-}
-
-function deleteTrait(hIdx, tIdx) {
-    homies[hIdx].traits.splice(tIdx, 1);
-    renderGrid();
-    document.getElementById(`card-${hIdx}`).classList.add('active');
-}
-
-function deleteHomie(index) {
-    if(confirm("Delete?")) {
-        homies.splice(index, 1);
-        renderGrid();
-    }
-}
-
-function saveHomie() {
-    const name = document.getElementById('nameInput').value;
-    const file = document.getElementById('imgInput').files[0];
-    if(!name) return;
-    
-    const finish = (img) => {
-        homies.push({name, img, traits: []});
-        goHome();
-        renderGrid();
-    };
-
-    if(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => finish(e.target.result);
-        reader.readAsDataURL(file);
-    } else {
-        finish('images/WBZR1.jpg');
-    }
-}
-
-function showAddPage() { document.getElementById('homePage').style.display='none'; document.getElementById('addPage').style.display='block'; }
-function goHome() { document.getElementById('homePage').style.display='block'; document.getElementById('addPage').style.display='none'; }
-
-window.onload = renderGrid;
-</script>
-</body>
-</html>
+                <div class="name" style="margin-bottom:15px; border-bottom: 2px solid #d8dfd2; width: 100%; padding-bottom: 10px;">${h.name}</div>
+                <div id="traits-${index}" style="display:
