@@ -65,21 +65,51 @@ button {margin-bottom:20px;padding:16px 28px;font-size:20px;cursor:pointer;backg
         localStorage.setItem('homies_data', JSON.stringify(homies));
     }
 
-    function saveHomie() {
-        const name = document.getElementById('nameInput').value;
-        const file = document.getElementById('imgInput').files[0];
-        
-        if (!name) return alert('Please enter a name');
+   function saveHomie() {
+    const nameInput = document.getElementById('nameInput');
+    const imgInput = document.getElementById('imgInput');
+    const name = nameInput.value.trim();
+    const file = imgInput.files[0];
+    
+    if (!name) {
+        alert('Please enter a name');
+        return;
+    }
 
-        const processData = (imgSrc) => {
-            homies.push({ name: name, img: imgSrc, traits: [] });
-            renderGrid();
-            goHome();
-            // Reset inputs
-            document.getElementById('nameInput').value = '';
-            document.getElementById('imgInput').value = '';
-            selectedDefault = '';
-        };
+    // Helper function to actually commit the save
+    const processData = (imgSrc) => {
+        homies.push({ 
+            name: name, 
+            img: imgSrc, 
+            traits: [] 
+        });
+        
+        // Save to browser memory and update the UI
+        renderGrid(); 
+        
+        // Clear inputs for next time
+        nameInput.value = '';
+        imgInput.value = '';
+        selectedDefault = '';
+        
+        // GO HOME
+        goHome();
+    };
+
+    if (file) {
+        // Option A: User uploaded a new file
+        const reader = new FileReader();
+        reader.onload = (e) => processData(e.target.result);
+        reader.onerror = () => alert("Error reading file!");
+        reader.readAsDataURL(file);
+    } else if (selectedDefault) {
+        // Option B: User clicked one of the 3 default images
+        processData(selectedDefault);
+    } else {
+        // Option C: Safety fall-back if nothing was picked
+        alert('Please click one of the pictures or upload a file.');
+    }
+}
 
         if (file) {
             const reader = new FileReader();
