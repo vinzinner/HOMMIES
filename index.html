@@ -45,104 +45,106 @@
     <button onclick="goHome()">Back</button>
 </div>
 
+
 <script>
-// 1. Your fixed backup string
-const exportedBackup = '[{"name":"hsj","img":"https://vinzinner.github.io/HOMMIES/images/WBZR1.jpg","traits":["菜","菜","菜"]},{"name":"zds","img":"https://vinzinner.github.io/HOMMIES/images/taawa.jpg","traits":["Absent","Absent","Absent"]},{"name":"zza","img":"https://vinzinner.github.io/HOMMIES/images/TowIg.jpg","traits":["fat ","fat","fat"]},{"name":"zza","img":"data:image/jpeg;base64,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';
+// 1. Simplified Backup (No long Base64 strings to prevent crashing)
+const exportedBackup = '[{"name":"hsj","img":"https://vinzinner.github.io/HOMMIES/images/WBZR1.jpg","traits":["菜","菜","菜"]},{"name":"zds","img":"https://vinzinner.github.io/HOMMIES/images/taawa.jpg","traits":["Absent","Absent","Absent"]},{"name":"zza","img":"https://vinzinner.github.io/HOMMIES/images/TowIg.jpg","traits":["fat ","fat","fat"]}]';
 
 // 2. FORCE the sample data to overwrite the browser memory
 let homies = JSON.parse(exportedBackup); 
 localStorage.setItem('homies_data', JSON.stringify(homies));
 
-// ... the rest of your code functions follow
+let selectedDefault = '';
+let currentProfileIndex = null;
 
-// ... the rest of your code functions follow
-    function renderGrid() {
-        const grid = document.getElementById('grid');
-        grid.innerHTML = '';
-        homies.forEach((h, index) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            // Main card click opens profile
-            card.onclick = (e) => { if(e.target.className !== 'delete-btn') openProfile(index); };
-            card.innerHTML = `
-                <button class="delete-btn" onclick="deleteHomie(${index})">X</button>
-                <div class='avatar'><img src='${h.img}'></div>
-                <div class='name'>${h.name}</div>
-            `;
-            grid.appendChild(card);
-        });
+function renderGrid() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    homies.forEach((h, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.onclick = (e) => { if(e.target.className !== 'delete-btn') openProfile(index); };
+        card.innerHTML = `
+            <button class="delete-btn" onclick="deleteHomie(${index})">X</button>
+            <div class='avatar'><img src='${h.img}'></div>
+            <div class='name'>${h.name}</div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function deleteHomie(index) {
+    if(confirm("Delete this homie?")) {
+        homies.splice(index, 1);
+        renderGrid();
         localStorage.setItem('homies_data', JSON.stringify(homies));
     }
+}
 
-    function deleteHomie(index) {
-        if(confirm("Delete this homie?")) {
-            homies.splice(index, 1);
-            renderGrid();
-        }
+function saveHomie() {
+    const name = document.getElementById('nameInput').value.trim();
+    const file = document.getElementById('imgInput').files[0];
+    if (!name) return alert('Enter name');
+
+    const process = (src) => {
+        homies.push({ name: name, img: src, traits: [] });
+        renderGrid(); 
+        goHome();
+    };
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => process(e.target.result);
+        reader.readAsDataURL(file);
+    } else if (selectedDefault) {
+        process(selectedDefault);
+    } else {
+        alert("Pick an image!");
     }
+}
 
-    function saveHomie() {
-        const name = document.getElementById('nameInput').value.trim();
-        const file = document.getElementById('imgInput').files[0];
-        if (!name) return alert('Enter name');
+function openProfile(index) {
+    currentProfileIndex = index;
+    document.getElementById('homePage').style.display = 'none';
+    document.getElementById('profilePage').style.display = 'block';
+    document.getElementById('profileName').innerText = homies[index].name;
+    displayTraits();
+}
 
-        const process = (src) => {
-            homies.push({ name: name, img: src, traits: [] });
-            renderGrid(); goHome();
-        };
+function addTrait() {
+    const word = prompt('Enter trait:');
+    if (!word) return;
+    homies[currentProfileIndex].traits.push(word);
+    displayTraits();
+    localStorage.setItem('homies_data', JSON.stringify(homies));
+}
 
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => process(e.target.result);
-            reader.readAsDataURL(file);
-        } else if (selectedDefault) {
-            process(selectedDefault);
-        } else {
-            alert("Pick an image!");
-        }
-    }
+function deleteTrait(traitIndex) {
+    homies[currentProfileIndex].traits.splice(traitIndex, 1);
+    displayTraits();
+    localStorage.setItem('homies_data', JSON.stringify(homies));
+}
 
-    function openProfile(index) {
-        currentProfileIndex = index;
-        document.getElementById('homePage').style.display = 'none';
-        document.getElementById('profilePage').style.display = 'block';
-        document.getElementById('profileName').innerText = homies[index].name;
-        displayTraits();
-    }
+function displayTraits() {
+    const container = document.getElementById('traits');
+    container.innerHTML = '';
+    const colors = ['#ff9999','#99ccff','#99ff99','#ffcc99','#cc99ff'];
+    homies[currentProfileIndex].traits.forEach((t, i) => {
+        const div = document.createElement('div');
+        div.className = 'trait-card';
+        div.style.background = colors[i % colors.length];
+        div.innerText = t;
+        div.onclick = () => deleteTrait(i);
+        container.appendChild(div);
+    });
+}
 
-    function addTrait() {
-        const word = prompt('Enter trait:');
-        if (!word) return;
-        homies[currentProfileIndex].traits.push(word);
-        displayTraits();
-        localStorage.setItem('homies_data', JSON.stringify(homies));
-    }
+function showAddPage() { document.getElementById('homePage').style.display = 'none'; document.getElementById('addPage').style.display = 'block'; }
+function goHome() { document.getElementById('homePage').style.display = 'block'; document.getElementById('addPage').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; }
+function selectDefault(src) { selectedDefault = src; }
 
-    function deleteTrait(traitIndex) {
-        homies[currentProfileIndex].traits.splice(traitIndex, 1);
-        displayTraits();
-        localStorage.setItem('homies_data', JSON.stringify(homies));
-    }
+window.onload = renderGrid;
 
-    function displayTraits() {
-        const container = document.getElementById('traits');
-        container.innerHTML = '';
-        const colors = ['#ff9999','#99ccff','#99ff99','#ffcc99','#cc99ff'];
-        homies[currentProfileIndex].traits.forEach((t, i) => {
-            const div = document.createElement('div');
-            div.className = 'trait-card';
-            div.style.background = colors[i % colors.length];
-            div.innerText = t;
-            div.onclick = () => deleteTrait(i); // Delete on click
-            container.appendChild(div);
-        });
-    }
-
-    function showAddPage() { document.getElementById('homePage').style.display = 'none'; document.getElementById('addPage').style.display = 'block'; }
-    function goHome() { document.getElementById('homePage').style.display = 'block'; document.getElementById('addPage').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; }
-    function selectDefault(src) { selectedDefault = src; }
-
-    window.onload = renderGrid;
 </script>
 </body>
 </html>
