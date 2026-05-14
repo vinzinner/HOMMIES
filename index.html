@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Friend Rating App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f4f4f9;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 400px;
+    }
+    h1 { text-align: center; }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover { background: #45a049; }
+    .friend {
+      margin-top: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Rate Your Friends</h1>
+    <input type="text" id="friendName" placeholder="Enter friend's name">
+    <input type="number" id="rating" min="1" max="10" placeholder="Rate 1-10">
+    <button onclick="addRating()">Submit Rating</button>
+    <div id="friendList"></div>
+  </div>
+
+  <script>
+    const friends = [];
+
+    function addRating() {
+      const name = document.getElementById('friendName').value;
+      const rating = document.getElementById('rating').value;
+
+      if (!name || !rating) {
+        alert('Please enter both name and rating.');
+        return;
+      }
+
+      friends.push({ name, rating });
+      displayFriends();
+
+      document.getElementById('friendName').value = '';
+      document.getElementById('rating').value = '';
+    }
+
+    function displayFriends() {
+      const list = document.getElementById('friendList');
+      list.innerHTML = '';
+
+      friends.forEach(friend => {
+        const div = document.createElement('div');
+        div.className = 'friend';
+        div.innerHTML = `<strong>${friend.name}</strong>: ${friend.rating}/10`;
+        list.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
