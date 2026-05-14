@@ -56,22 +56,22 @@ window.db=getFirestore(app);
 </div>
 
 <script>
-function showAddPage(){document.getElementById('homePage').style.display='none';document.getElementById('addPage').style.display='block';}
-function goHome(){
+window.showAddPage=function showAddPage(){document.getElementById('homePage').style.display='none';document.getElementById('addPage').style.display='block';}
+window.goHome=function goHome(){
 document.getElementById('homePage').style.display='block';
 document.getElementById('addPage').style.display='none';
 document.getElementById('profilePage').style.display='none';
 }
 let homies=[]; let selectedDefault=''; window.onload=async()=>{const querySnapshot=await getDocs(collection(window.db,'homies'));querySnapshot.forEach((doc)=>{const h=doc.data();const card=document.createElement('div');card.className='card';card.innerHTML=`<div class='avatar'><img src='${h.img}'></div><div class='name'>${h.name}</div>`;document.getElementById('grid').appendChild(card);homies.push(h);});};
-function selectDefault(src){selectedDefault=src;}
-function openProfile(index){
+window.selectDefault=function selectDefault(src){selectedDefault=src;}
+window.openProfile=function openProfile(index){
 const h=homies[index];
 document.getElementById('homePage').style.display='none';
 document.getElementById('profilePage').style.display='block';
 document.getElementById('profileName').innerText=h.name;
 }
 
-function addTrait(){
+window.addTrait=function addTrait(){
 const word=prompt('Enter trait word:');
 if(!word)return;
 const colors=['#ff9999','#99ccff','#99ff99','#ffcc99','#cc99ff'];
@@ -82,7 +82,7 @@ card.innerText=word;
 document.getElementById('traits').appendChild(card);
 }
 
-function saveHomie(){
+window.saveHomie=function saveHomie(){
 const name=document.getElementById('nameInput').value;
 const file=document.getElementById('imgInput').files[0];
 if(!name)return alert('Add name'); if(!file&&!selectedDefault)return alert('Choose image');
@@ -97,8 +97,8 @@ document.getElementById('grid').appendChild(card);
 goHome();};
 reader.readAsDataURL(file);
 }
-function exportData(){const data=JSON.stringify(homies);const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='homies-save.json';a.click();}
-function importData(event){const file=event.target.files[0];const reader=new FileReader();reader.onload=function(e){homies=JSON.parse(e.target.result);document.getElementById('grid').innerHTML='';homies.forEach((h,i)=>{const card=document.createElement('div');card.className='card';card.innerHTML=`<div class="avatar"><img src="${h.img||selectedDefault}"></div><div class="name">${h.name}</div>`;card.onclick=()=>openProfile(i);document.getElementById('grid').appendChild(card);});};reader.readAsText(file);}
+window.exportData=function exportData(){const data=JSON.stringify(homies);const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='homies-save.json';a.click();}
+window.importData=function importData(event){const file=event.target.files[0];const reader=new FileReader();reader.onload=function(e){homies=JSON.parse(e.target.result);document.getElementById('grid').innerHTML='';homies.forEach((h,i)=>{const card=document.createElement('div');card.className='card';card.innerHTML=`<div class="avatar"><img src="${h.img||selectedDefault}"></div><div class="name">${h.name}</div>`;card.onclick=()=>openProfile(i);document.getElementById('grid').appendChild(card);});};reader.readAsText(file);}
 </script>
 
 </body>
