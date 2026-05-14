@@ -1,88 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Friend Rating App</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: #f4f4f9;
-      margin: 0;
-    }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      width: 400px;
-    }
-    h1 { text-align: center; }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover { background: #45a049; }
-    .friend {
-      margin-top: 15px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homies</title>
+<style>
+body {margin:0;font-family:Arial;background:#aaa;padding:40px;text-align:center;}
+.grid {display:grid;grid-template-columns:repeat(3,250px);gap:40px;justify-content:center;}
+.card {background:#a97f7f;border:8px solid #d8dfd2;border-radius:10px;padding:20px;box-shadow:4px 4px 10px rgba(0,0,0,0.2);}
+.avatar {width:100%;height:220px;background:#d8dfd2;overflow:hidden;display:flex;justify-content:center;align-items:center;}
+.avatar img {width:100%;height:100%;object-fit:cover;}
+.name {margin-top:18px;font-size:24px;font-weight:bold;color:white;}
+button {margin-bottom:20px;padding:16px 28px;font-size:20px;cursor:pointer;background:#a97f7f;border:8px solid #d8dfd2;border-radius:10px;color:white;font-weight:bold;box-shadow:4px 4px 10px rgba(0,0,0,0.2);}
+#addPage {display:none;}
+</style>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const firebaseConfig = {
+apiKey: "AIzaSyAORMfob0idYWS-nP3O-yQyQdECcCm1DKo",
+authDomain: "homie-b6528.firebaseapp.com",
+projectId: "homie-b6528",
+storageBucket: "homie-b6528.firebasestorage.app",
+messagingSenderId: "1009947315676",
+appId: "1:1009947315676:web:784183f12980b6e61e5319"
+};
+
+const app = initializeApp(firebaseConfig);
+window.db=getFirestore(app);
+</script>
 </head>
 <body>
-  <div class="container">
-    <h1>Rate Your Friends</h1>
-    <input type="text" id="friendName" placeholder="Enter friend's name">
-    <input type="number" id="rating" min="1" max="10" placeholder="Rate 1-10">
-    <button onclick="addRating()">Submit Rating</button>
-    <div id="friendList"></div>
-  </div>
 
-  <script>
-    const friends = [];
+<div id="homePage">
+<button onclick="showAddPage()">+ Add a New Homie</button>
+<button onclick="exportData()">Export Save</button>
+<input type='file' id='importFile' onchange='importData(event)' style='display:none'>
+<button onclick="document.getElementById('importFile').click()">Import Save</button>
+<div class="grid" id="grid"></div>
+</div>
 
-    function addRating() {
-      const name = document.getElementById('friendName').value;
-      const rating = document.getElementById('rating').value;
+<div id="profilePage" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#aaa; padding:40px; box-sizing:border-box; z-index:1000; overflow:auto;">
+<h1 id="profileName"></h1>
+<div id='traits' style='display:flex;flex-wrap:wrap;gap:20px;justify-content:center;'></div><br><button onclick='addTrait()' id='traitBtn'>+ Add Trait</button>
+<button onclick="goHome()">Back</button>
+</div>
 
-      if (!name || !rating) {
-        alert('Please enter both name and rating.');
-        return;
-      }
+<div id="addPage">
+<h1>Add a Homie</h1>
+<input type="text" id="nameInput" placeholder="Homie Name"><br><br>
+<input type="file" id="imgInput" accept="image/*"><br><br><p>Or choose a default avatar:</p><div id='defaultPics' style='display:flex;justify-content:center;gap:15px;'><img src='images/WBZR1.jpg' onclick='selectDefault(this.src)' style='width:80px;height:80px;cursor:pointer;border:4px solid #d8dfd2;border-radius:10px;'><img src='images/taawa.jpg' onclick='selectDefault(this.src)' style='width:80px;height:80px;cursor:pointer;border:4px solid #d8dfd2;border-radius:10px;'><img src='images/TowIg.jpg' onclick='selectDefault(this.src)' style='width:80px;height:80px;cursor:pointer;border:4px solid #d8dfd2;border-radius:10px;'></div><br>
+<button onclick="saveHomie()">Save</button>
+<button onclick="goHome()">Back</button>
+</div>
 
-      friends.push({ name, rating });
-      displayFriends();
+<script>
+function showAddPage(){document.getElementById('homePage').style.display='none';document.getElementById('addPage').style.display='block';}
+function goHome(){
+document.getElementById('homePage').style.display='block';
+document.getElementById('addPage').style.display='none';
+document.getElementById('profilePage').style.display='none';
+}
+let homies=[]; let selectedDefault=''; window.onload=async()=>{const querySnapshot=await getDocs(collection(window.db,'homies'));querySnapshot.forEach((doc)=>{const h=doc.data();const card=document.createElement('div');card.className='card';card.innerHTML=`<div class='avatar'><img src='${h.img}'></div><div class='name'>${h.name}</div>`;document.getElementById('grid').appendChild(card);homies.push(h);});};
+function selectDefault(src){selectedDefault=src;}
+function openProfile(index){
+const h=homies[index];
+document.getElementById('homePage').style.display='none';
+document.getElementById('profilePage').style.display='block';
+document.getElementById('profileName').innerText=h.name;
+}
 
-      document.getElementById('friendName').value = '';
-      document.getElementById('rating').value = '';
-    }
+function addTrait(){
+const word=prompt('Enter trait word:');
+if(!word)return;
+const colors=['#ff9999','#99ccff','#99ff99','#ffcc99','#cc99ff'];
+const card=document.createElement('div');
+card.className='card';
+card.style.background=colors[Math.floor(Math.random()*colors.length)];
+card.innerText=word;
+document.getElementById('traits').appendChild(card);
+}
 
-    function displayFriends() {
-      const list = document.getElementById('friendList');
-      list.innerHTML = '';
+function saveHomie(){
+const name=document.getElementById('nameInput').value;
+const file=document.getElementById('imgInput').files[0];
+if(!name)return alert('Add name'); if(!file&&!selectedDefault)return alert('Choose image');
+if(selectedDefault){const card=document.createElement('div');card.className='card';card.innerHTML=`<div class='avatar'><img src='${selectedDefault}'></div><div class='name'>${name}</div>`;homies.push({name:name,img:selectedDefault}); addDoc(collection(window.db,'homies'),{name:name,img:selectedDefault});card.onclick=()=>openProfile(homies.length-1);document.getElementById('grid').appendChild(card);goHome();return;} const reader=new FileReader();
+reader.onload=function(e){
+const card=document.createElement('div');
+card.className='card';
+card.innerHTML=`<div class='avatar'><img src='${e.target.result}'></div><div class='name'>${name}</div>`;
+homies.push({name:name});
+card.onclick=()=>openProfile(homies.length-1);
+document.getElementById('grid').appendChild(card);
+goHome();};
+reader.readAsDataURL(file);
+}
+function exportData(){const data=JSON.stringify(homies);const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='homies-save.json';a.click();}
+function importData(event){const file=event.target.files[0];const reader=new FileReader();reader.onload=function(e){homies=JSON.parse(e.target.result);document.getElementById('grid').innerHTML='';homies.forEach((h,i)=>{const card=document.createElement('div');card.className='card';card.innerHTML=`<div class="avatar"><img src="${h.img||selectedDefault}"></div><div class="name">${h.name}</div>`;card.onclick=()=>openProfile(i);document.getElementById('grid').appendChild(card);});};reader.readAsText(file);}
+</script>
 
-      friends.forEach(friend => {
-        const div = document.createElement('div');
-        div.className = 'friend';
-        div.innerHTML = `<strong>${friend.name}</strong>: ${friend.rating}/10`;
-        list.appendChild(div);
-      });
-    }
-  </script>
 </body>
 </html>
